@@ -10,13 +10,11 @@ const docTemplate = `{
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
         "contact": {
-            "name": "None",
-            "url": "None",
-            "email": "None"
+            "name": "Maximilian Kruse",
+            "url": "https://github.com/maxkruse"
         },
         "license": {
-            "name": "None",
-            "url": "None"
+            "name": "No License"
         },
         "version": "{{.Version}}"
     },
@@ -29,7 +27,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "bookstore.mkruse.xyz",
-	BasePath:         "/v1",
+	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "LM Studio Website API",
 	Description:      "This is a sample server for a bookstore server with included LLM functionality.",

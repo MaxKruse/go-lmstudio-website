@@ -13,15 +13,13 @@ import (
 // @version 1.0
 // @description This is a sample server for a bookstore server with included LLM functionality.
 
-// @contact.name None
-// @contact.url None
-// @contact.email None
+// @contact.name Maximilian Kruse
+// @contact.url https://github.com/maxkruse
 
-// @license.name None
-// @license.url None
+// @license.name No License
 
 // @host bookstore.mkruse.xyz
-// @BasePath /v1
+// @BasePath /api/v1
 func main() {
 	e := echo.New()
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
