@@ -33,7 +33,7 @@ func init() {
 
 // @license.name No License
 
-// @host bookstore.mkruse.xyz
+// @host localhost:3000
 // @BasePath /api/v1
 func main() {
 	port := os.Getenv("SERVER_PORT")

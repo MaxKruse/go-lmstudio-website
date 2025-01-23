@@ -16,7 +16,7 @@ import (
 // @Tags books
 // @Produce json
 // @Success 200 {array} dtos.Book
-// @Router /path [get]
+// @Router /books [get]
 func GetBooks(c echo.Context) error {
 	books := service.GetBooks()
 
