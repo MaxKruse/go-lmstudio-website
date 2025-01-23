@@ -12,3 +12,7 @@ CREATE TABLE IF NOT EXISTS books (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP
 );
+
+ALTER TABLE books
+ADD CONSTRAINT unique_entry_constraint
+UNIQUE (title, author, description, published_date);
