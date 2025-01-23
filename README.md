@@ -4,3 +4,10 @@ This project is a proof-of-concept (and learning exercise for myself) on how to 
 
 An openapi spec will be provided using the tool [Swaggo](https://github.com/swaggo/swag).
 
+## Requirements
+
+This project requires the following:
+
+- [go 1.23](https://go.dev/doc/install)
+- [LM Studio](https://lmstudio.ai/docs/api/server)
+- [Swag](https://github.com/swaggo/swag) and [Echo-Swagger](https://github.com/swaggo/echo-swagger)
