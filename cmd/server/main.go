@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -11,6 +12,7 @@ import (
 	echoSwagger "github.com/swaggo/echo-swagger"
 
 	_ "github.com/maxkruse/go-lmstudio-website/docs"
+	"github.com/maxkruse/go-lmstudio-website/internal/db/migrations"
 )
 
 func init() {
@@ -45,6 +47,13 @@ func main() {
 
 	fmt.Printf("Starting server on port %s in %s mode...\n", port, env)
 
+	// in case anything goes boom, defer a recover
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("Panic: %v", r)
+		}
+	}()
+
 	// echo base router
 	e := echo.New()
 
@@ -52,6 +61,19 @@ func main() {
 	if env == "development" {
 		e.Use(middleware.CORS())
 		e.GET("/swagger/*", echoSwagger.WrapHandler)
+
+		// also migrate up
+		if err := migrations.MigrateUp(); err != nil {
+			log.Fatal(err)
+		}
+
+		// and migrate down on shutdown
+		defer func() {
+			if err := migrations.MigrateDown(); err != nil {
+				log.Fatal(err)
+			}
+		}()
+
 	}
 
 	e.GET("/", func(c echo.Context) error {

@@ -18,3 +18,13 @@ This project requires the following:
 To re-generate the openapi spec, run `swag init --dir ./cmd/server/,./internal/api/v1/` in the root directory. 
 
 **This is important as the files provided in this repo are not being updated and only contain contact information.**
+
+To create a new migration, first install migrate:
+
+> go install github.com/golang-migrate/migrate/v4/cmd/migrate@4.18.1
+
+Then run:
+
+> migrate create -ext sql -dir ./migrations/ -seq <name>
+
+This will create a new migration file in the `./migrations/` directory.

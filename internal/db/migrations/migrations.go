@@ -2,6 +2,7 @@ package migrations
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -17,13 +18,19 @@ func MigrateUp() error {
 
 	connectionString := fmt.Sprintf("postgres://%s:%s@%s:5432/postgres?sslmode=disable", DB_USER, DB_PASS, DB_HOST)
 
-	migrator, err := migrate.New("file://./internal/db/migrations", connectionString)
+	migrator, err := migrate.New("file://./migrations/", connectionString)
 
 	if err != nil {
 		return err
 	}
 
-	return migrator.Up()
+	err = migrator.Up()
+	if err != nil && err != migrate.ErrNoChange {
+		return err
+	}
+
+	log.Printf("Migration Up successful")
+	return nil
 }
 
 func MigrateDown() error {
@@ -34,11 +41,17 @@ func MigrateDown() error {
 
 	connectionString := fmt.Sprintf("postgres://%s:%s@%s:5432/postgres?sslmode=disable", DB_USER, DB_PASS, DB_HOST)
 
-	migrator, err := migrate.New("file://./internal/db/migrations", connectionString)
+	migrator, err := migrate.New("file://./migrations/", connectionString)
 
 	if err != nil {
 		return err
 	}
 
-	return migrator.Down()
+	err = migrator.Down()
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Migration Down successful")
+	return nil
 }
