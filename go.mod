@@ -1,4 +1,4 @@
-module initgithub.com/maxkruse/go-lmstudio-website
+module github.com/maxkruse/go-lmstudio-website
 
 go 1.23.3
 
