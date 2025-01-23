@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 )
 
 var (
@@ -15,17 +16,18 @@ var (
 	err error
 )
 
-func init() {
+func initDb() {
 	DB_USER := os.Getenv("DB_USER")
 	DB_PASS := os.Getenv("DB_PASSWORD")
 	DB_HOST := os.Getenv("DB_HOST")
+	DB_PORT := os.Getenv("DB_PORT")
+	DB_NAME := os.Getenv("DB_NAME")
 
-	connectionString := fmt.Sprintf(
-		"postgres://%s:%s@%s:5432/postgres?sslmode=disable",
-		DB_USER, DB_PASS, DB_HOST,
-	)
+	dbURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		DB_USER, DB_PASS, DB_HOST, DB_PORT, DB_NAME)
 
-	db, err = sqlx.Open("postgres", connectionString)
+	// Open the connection
+	db, err = sqlx.Open("postgres", dbURL)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -38,6 +40,11 @@ func init() {
 }
 
 func ExecuteTx(ctx context.Context, f func(*sqlx.Tx) error) error {
+
+	if db == nil {
+		initDb()
+	}
+
 	if ctx == nil {
 		ctx = context.Background()
 	}

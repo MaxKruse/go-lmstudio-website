@@ -15,10 +15,15 @@ func MigrateUp() error {
 	DB_USER := os.Getenv("DB_USER")
 	DB_PASS := os.Getenv("DB_PASSWORD")
 	DB_HOST := os.Getenv("DB_HOST")
+	DB_PORT := os.Getenv("DB_PORT")
+	DB_NAME := os.Getenv("DB_NAME")
 
-	connectionString := fmt.Sprintf("postgres://%s:%s@%s:5432/postgres?sslmode=disable", DB_USER, DB_PASS, DB_HOST)
+	log.Println("Trying to migrate up")
 
-	migrator, err := migrate.New("file://./migrations/", connectionString)
+	dbURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		DB_USER, DB_PASS, DB_HOST, DB_PORT, DB_NAME)
+
+	migrator, err := migrate.New("file://./migrations/", dbURL)
 
 	if err != nil {
 		return err
@@ -38,10 +43,15 @@ func MigrateDown() error {
 	DB_USER := os.Getenv("DB_USER")
 	DB_PASS := os.Getenv("DB_PASS")
 	DB_HOST := os.Getenv("DB_HOST")
+	DB_PORT := os.Getenv("DB_PORT")
+	DB_NAME := os.Getenv("DB_NAME")
 
-	connectionString := fmt.Sprintf("postgres://%s:%s@%s:5432/postgres?sslmode=disable", DB_USER, DB_PASS, DB_HOST)
+	log.Println("Trying to migrate down")
 
-	migrator, err := migrate.New("file://./migrations/", connectionString)
+	dbURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		DB_USER, DB_PASS, DB_HOST, DB_PORT, DB_NAME)
+
+	migrator, err := migrate.New("file://./migrations/", dbURL)
 
 	if err != nil {
 		return err

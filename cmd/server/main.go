@@ -12,6 +12,7 @@ import (
 	echoSwagger "github.com/swaggo/echo-swagger"
 
 	_ "github.com/maxkruse/go-lmstudio-website/docs"
+	v1 "github.com/maxkruse/go-lmstudio-website/internal/api/v1"
 	"github.com/maxkruse/go-lmstudio-website/internal/db/migrations"
 )
 
@@ -66,18 +67,13 @@ func main() {
 		if err := migrations.MigrateUp(); err != nil {
 			log.Fatal(err)
 		}
-
-		// and migrate down on shutdown
-		defer func() {
-			if err := migrations.MigrateDown(); err != nil {
-				log.Fatal(err)
-			}
-		}()
-
 	}
 
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
+
+	v1.RegisterRoutes(e)
+
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", port)))
 }
