@@ -6,6 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/maxkruse/go-lmstudio-website/internal/db"
+	requestdtos "github.com/maxkruse/go-lmstudio-website/internal/models/dtos/request_dtos"
 	"github.com/maxkruse/go-lmstudio-website/internal/models/entities"
 )
 
@@ -53,7 +54,7 @@ func GetBookById(id int32) entities.Book {
 	return book
 }
 
-func CreateBook(book entities.Book) error {
+func CreateBook(book requestdtos.CreateBookRequest) error {
 	err := db.ExecuteTx(context.Background(), func(tx *sqlx.Tx) error {
 		_, err := tx.NamedExec(`INSERT INTO books (title, author, description, image_url, published_date, isbn, price) VALUES (:title, :author, :description, :image_url, :published_date, :isbn, :price)`, book)
 

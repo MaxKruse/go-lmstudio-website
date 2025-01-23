@@ -6,6 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/maxkruse/go-lmstudio-website/internal/models/dtos"
+	requestdtos "github.com/maxkruse/go-lmstudio-website/internal/models/dtos/request_dtos"
 	"github.com/maxkruse/go-lmstudio-website/internal/service"
 	"github.com/maxkruse/go-lmstudio-website/internal/utils/converters"
 )
@@ -14,8 +15,8 @@ import (
 // @Description Gets all non-deleted books
 // @Tags books
 // @Produce json
-// @Success 200 {dtos.Book} Response
-// @Router /path [get put post delete patch]
+// @Success 200 {array} dtos.Book
+// @Router /path [get]
 func GetBooks(c echo.Context) error {
 	books := service.GetBooks()
 
@@ -37,12 +38,12 @@ func GetBookById(c echo.Context) error {
 }
 
 func CreateBook(c echo.Context) error {
-	var book dtos.Book
+	var book requestdtos.CreateBookRequest
 	if err := c.Bind(&book); err != nil {
 		return err
 	}
 
-	if err := service.CreateBook(converters.BookDtoToEntity(book)); err != nil {
+	if err := service.CreateBook(book); err != nil {
 		return err
 	}
 
