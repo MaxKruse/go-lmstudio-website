@@ -1,4 +1,15 @@
+basePath: /v1
+host: bookstore.mkruse.xyz
 info:
-  contact: {}
+  contact:
+    email: None
+    name: None
+    url: None
+  description: This is a sample server for a bookstore server with included LLM functionality.
+  license:
+    name: None
+    url: None
+  title: LM Studio Website API
+  version: "1.0"
 paths: {}
 swagger: "2.0"

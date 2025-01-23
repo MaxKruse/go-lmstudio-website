@@ -1,7 +1,20 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "This is a sample server for a bookstore server with included LLM functionality.",
+        "title": "LM Studio Website API",
+        "contact": {
+            "name": "None",
+            "url": "None",
+            "email": "None"
+        },
+        "license": {
+            "name": "None",
+            "url": "None"
+        },
+        "version": "1.0"
     },
+    "host": "bookstore.mkruse.xyz",
+    "basePath": "/v1",
     "paths": {}
 }
