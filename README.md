@@ -11,3 +11,7 @@ This project requires the following:
 - [go 1.23](https://go.dev/doc/install)
 - [LM Studio](https://lmstudio.ai/docs/api/server)
 - [Swag](https://github.com/swaggo/swag) and [Echo-Swagger](https://github.com/swaggo/echo-swagger)
+
+## Tips
+
+To re-generate the openapi spec, run `swag init --dir .\cmd\server\` in the root directory.
