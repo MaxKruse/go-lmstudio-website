@@ -14,4 +14,6 @@ This project requires the following:
 
 ## Tips
 
-To re-generate the openapi spec, run `swag init --dir .\cmd\server\` in the root directory.
+To re-generate the openapi spec, run `swag init --dir .\cmd\server\` in the root directory. 
+
+**This is important as the files provided in this repo are not being updated and only contain contact information.**
