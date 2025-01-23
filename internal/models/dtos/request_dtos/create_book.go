@@ -1,5 +1,6 @@
 package requestdtos
 
+// @Description		Create book request
 type CreateBookRequest struct {
 	Title         string  `json:"title"`
 	Author        string  `json:"author"`

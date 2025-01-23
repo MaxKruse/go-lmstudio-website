@@ -16,15 +16,28 @@ import (
 // @Tags books
 // @Produce json
 // @Success 200 {array} dtos.Book
+// @Failure	500	{object} dtos.ErrorResponse
 // @Router /books [get]
 func GetBooks(c echo.Context) error {
-	books := service.GetBooks()
+	books, err := service.GetBooks()
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, dtos.ErrorResponse{Error: err.Error()})
+	}
 
 	bookDtos := converters.BookEntityToDtoSlice(books)
 
 	return c.JSON(http.StatusOK, bookDtos)
 }
 
+// @Summary Get a book by id
+// @Description Gets a single book my id if possible
+// @Tags books
+// @Produce json
+// @Param	id	path	integer	true "Book id"
+// @Success 200 {object} dtos.Book
+// @Failure	404	{object}	dtos.ErrorResponse
+// @Router /books/{id} [get]
 func GetBookById(c echo.Context) error {
 	id := c.Param("id")
 	// parse the id as an int32
@@ -33,10 +46,24 @@ func GetBookById(c echo.Context) error {
 		return err
 	}
 
-	book := service.GetBookById(int32(idInt))
+	book, err := service.GetBookById(int32(idInt))
+
+	if err != nil {
+		return c.JSON(http.StatusNotFound, dtos.ErrorResponse{Error: err.Error()})
+	}
+
 	return c.JSON(http.StatusOK, book)
 }
 
+// @Summary Create a book
+// @Description Creates a new book
+// @Tags books
+// @Accept json
+// @Produce json
+// @Param	book	body	requestdtos.CreateBookRequest	true "Book to create"
+// @Success 201 {object} dtos.Book
+// @Failure	500	{object} dtos.ErrorResponse
+// @Router /books [post]
 func CreateBook(c echo.Context) error {
 	var book requestdtos.CreateBookRequest
 	if err := c.Bind(&book); err != nil {
@@ -66,7 +93,13 @@ func UpdateBook(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, converters.BookEntityToDto(service.GetBookById(idInt)))
+	bookEntity, err := service.GetBookById(idInt)
+
+	if err != nil {
+		return c.JSON(http.StatusNotFound, dtos.ErrorResponse{Error: err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, converters.BookEntityToDto(bookEntity))
 }
 
 func DeleteBook(c echo.Context) error {

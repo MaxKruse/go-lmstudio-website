@@ -10,7 +10,7 @@ import (
 	"github.com/maxkruse/go-lmstudio-website/internal/models/entities"
 )
 
-func GetBooks() []entities.Book {
+func GetBooks() ([]entities.Book, error) {
 	var books []entities.Book
 
 	err := db.ExecuteTx(context.Background(), func(tx *sqlx.Tx) error {
@@ -23,20 +23,14 @@ func GetBooks() []entities.Book {
 		return nil
 	})
 
-	if err != nil {
-		log.Println(err)
-	}
-
-	// TODO: Implement the actual logic to fetch books from the database
-
-	return books
+	return books, err
 }
 
-func GetBookById(id int32) entities.Book {
+func GetBookById(id int32) (entities.Book, error) {
 	var book entities.Book
 
 	err := db.ExecuteTx(context.Background(), func(tx *sqlx.Tx) error {
-		err := tx.Get(&book, "SELECT * FROM books WHERE id = $1 AND deleted_at IS NULL", id)
+		err := tx.QueryRow("SELECT * FROM books WHERE id = $1 AND deleted_at IS NULL", id).Scan(&book)
 
 		if err != nil {
 			return err
@@ -45,13 +39,7 @@ func GetBookById(id int32) entities.Book {
 		return nil
 	})
 
-	if err != nil {
-		log.Println(err)
-	}
-
-	// TODO: Implement the actual logic to fetch a book from the database
-
-	return book
+	return book, err
 }
 
 func CreateBook(book requestdtos.CreateBookRequest) error {
