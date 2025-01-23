@@ -5,14 +5,21 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 
 	_ "github.com/maxkruse/go-lmstudio-website/docs"
-
-	"github.com/joho/godotenv"
 )
+
+func init() {
+	// load environment variables from .env file
+	err := godotenv.Load()
+	if err != nil {
+		panic(err)
+	}
+}
 
 // @title LM Studio Website API
 // @version 1.0
@@ -26,12 +33,6 @@ import (
 // @host bookstore.mkruse.xyz
 // @BasePath /api/v1
 func main() {
-	// load environment variables from .env file
-	err := godotenv.Load()
-	if err != nil {
-		panic(err)
-	}
-
 	port := os.Getenv("SERVER_PORT")
 	if port == "" {
 		port = "3000"
