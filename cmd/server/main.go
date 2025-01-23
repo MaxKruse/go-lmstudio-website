@@ -5,8 +5,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	echoSwagger "github.com/swaggo/echo-swagger"
-
-	_ "github.com/maxkruse/go-lmstudio-website/cmd/server/docs"
 )
 
 func main() {
