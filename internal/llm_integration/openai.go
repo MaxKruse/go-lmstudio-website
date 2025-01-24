@@ -7,6 +7,7 @@ import (
 	"os"
 
 	aitools "github.com/maxkruse/go-lmstudio-website/internal/llm_integration/ai_tools"
+	"github.com/maxkruse/go-lmstudio-website/internal/models/dtos"
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
 )
@@ -17,7 +18,14 @@ type AIClient struct {
 	availableTools []openai.ChatCompletionToolParam
 }
 
+var aiClient AIClient
+
 func NewClient() AIClient {
+
+	if aiClient.client != nil {
+		return aiClient
+	}
+
 	BASE_URL := os.Getenv("LM_STUDIO_HOST")
 	baseUrlOption := option.WithBaseURL(BASE_URL)
 	API_KEY := os.Getenv("LM_STUDIO_API_KEY")
@@ -26,7 +34,6 @@ func NewClient() AIClient {
 
 	client := openai.NewClient(baseUrlOption, apiKeyOption)
 
-	var aiClient AIClient
 	aiClient.client = client
 	aiClient.model = modelChoice
 
@@ -41,30 +48,41 @@ func (ai *AIClient) addAllTools() {
 	ai.availableTools = append(ai.availableTools, aitools.GetWeatherTool()...)
 }
 
-func (ai *AIClient) GetCompletion(ctx context.Context, prompt string) (string, error) {
+func (ai *AIClient) GetCompletion(ctx context.Context, prompt string, paramsUsed *openai.ChatCompletionNewParams) (*dtos.CompletionResult, error) {
 	// make a completion with the entire prompt that we know
 
-	params := openai.ChatCompletionNewParams{
-		Messages: openai.F([]openai.ChatCompletionMessageParamUnion{
-			openai.SystemMessage("You are a highly capable and collaborative AI assistant with access to tools. Your purpose is to provide accurate, detailed, and context-aware responses to user queries. When you encounter a task that can benefit from tool usage (e.g., executing code, retrieving information, generating images, or processing data), you must use the appropriate tool. After using a tool, clearly explain the results or actions to the user. If the task requires multiple steps, plan your approach and communicate progress effectively. Always consider the context of the user's request and prioritize relevance, clarity, and precision in your responses. When unsure about a specific need, ask clarifying questions before proceeding. Avoid using tools unnecessarily and ensure any generated output is actionable and aligns with the user's goals."),
-			openai.UserMessage(prompt),
-		}),
-		Tools:      openai.F(ai.availableTools),
-		Seed:       openai.Int(0),
-		Model:      openai.String(ai.model),
-		ToolChoice: openai.F(openai.ChatCompletionToolChoiceOptionUnionParam(openai.ChatCompletionToolChoiceOptionAutoAuto)),
+	var completionResult dtos.CompletionResult
+	var params openai.ChatCompletionNewParams
+
+	if paramsUsed != nil {
+		params = *paramsUsed
+	} else {
+		params = openai.ChatCompletionNewParams{
+			Messages: openai.F([]openai.ChatCompletionMessageParamUnion{
+				openai.SystemMessage("You are a highly capable and collaborative AI assistant with access to tools. Your purpose is to provide accurate, detailed, and context-aware responses to user queries. When you encounter a task that can benefit from tool usage (e.g., executing code, retrieving information, generating images, or processing data), you must use the appropriate tool. After using a tool, clearly explain the results or actions to the user. If the task requires multiple steps, plan your approach and communicate progress effectively. Always consider the context of the user's request and prioritize relevance, clarity, and precision in your responses. When unsure about a specific need, ask clarifying questions before proceeding. Avoid using tools unnecessarily and ensure any generated output is actionable and aligns with the user's goals."),
+				openai.UserMessage(prompt),
+			}),
+			Tools:      openai.F(ai.availableTools),
+			Seed:       openai.Int(0),
+			Model:      openai.String(ai.model),
+			ToolChoice: openai.F(openai.ChatCompletionToolChoiceOptionUnionParam(openai.ChatCompletionToolChoiceOptionAutoAuto)),
+		}
 	}
 
 	completion, err := ai.client.Chat.Completions.New(ctx, params)
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	toolCalls := completion.Choices[0].Message.ToolCalls
+
+	completionResult.ParamsUsed = params
+	completionResult.LastCompletion = completion
+
 	if len(toolCalls) == 0 {
 		log.Println("No tool calls found")
-		return completion.Choices[0].Message.Content, nil
+		return &completionResult, nil
 	}
 
 	params.Messages.Value = append(params.Messages.Value, completion.Choices[0].Message)
@@ -94,8 +112,10 @@ func (ai *AIClient) GetCompletion(ctx context.Context, prompt string) (string, e
 
 	completion, err = ai.client.Chat.Completions.New(ctx, params)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return completion.Choices[0].Message.Content, nil
+	completionResult.LastCompletion = completion
+
+	return &completionResult, nil
 }
