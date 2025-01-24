@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/golang-migrate/migrate/v4"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -62,13 +63,13 @@ func main() {
 		e.Use(middleware.CORS())
 		e.GET("/swagger/*", echoSwagger.WrapHandler)
 
-		if err := migrations.MigrateDown(); err != nil {
-			log.Fatal(err)
+		if err := migrations.MigrateDown(); err != nil && err != migrate.ErrNoChange {
+			log.Fatal("Fatal error on migrate down:", err)
 		}
 
 		// also migrate up
 		if err := migrations.MigrateUp(); err != nil {
-			log.Fatal(err)
+			log.Fatal("Fatal error on migrate up:", err)
 		}
 	}
 
