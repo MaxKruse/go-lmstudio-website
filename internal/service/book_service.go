@@ -14,7 +14,17 @@ func GetBooks() ([]entities.Book, error) {
 	var books []entities.Book
 
 	err := db.ExecuteTx(context.Background(), func(tx *sqlx.Tx) error {
-		err := tx.Select(&books, "SELECT * FROM books WHERE deleted_at IS NULL ORDER BY id DESC")
+		err := tx.Select(&books, `SELECT id,
+    title,
+    author,
+    description,
+    image_url,
+    published_date,
+    isbn,
+    price,
+    created_at,
+    updated_at,
+    COALESCE(deleted_at::TEXT, 'Not Deleted') AS deleted_at FROM books WHERE deleted_at IS NULL ORDER BY id DESC`)
 
 		if err != nil {
 			return err
@@ -42,22 +52,16 @@ func GetBookById(id int32) (entities.Book, error) {
 	return book, err
 }
 
-func CreateBook(book requestdtos.CreateBookRequest) error {
+func CreateBook(book requestdtos.CreateBookRequest) (entities.Book, error) {
+	var newBook entities.Book
+
 	err := db.ExecuteTx(context.Background(), func(tx *sqlx.Tx) error {
-		_, err := tx.NamedExec(`INSERT INTO books (title, author, description, image_url, published_date, isbn, price) VALUES (:title, :author, :description, :image_url, :published_date, :isbn, :price)`, book)
+		row := tx.QueryRow(`INSERT INTO books (title, author, description, image_url, published_date, isbn, price) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING ID`, book.Title, book.Author, book.Description, book.ImageUrl, book.PublishedDate, book.Isbn, book.Price)
 
-		if err != nil {
-			return err
-		}
-
-		return nil
+		return row.Scan(&newBook.Id)
 	})
 
-	if err != nil {
-		log.Println(err)
-	}
-
-	return err
+	return newBook, err
 }
 
 func UpdateBook(book entities.Book) error {

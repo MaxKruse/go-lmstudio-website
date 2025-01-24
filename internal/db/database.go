@@ -17,14 +17,14 @@ var (
 )
 
 func initDb() {
-	DB_USER := os.Getenv("DB_USER")
-	DB_PASS := os.Getenv("DB_PASSWORD")
+	POSTGRES_USER := os.Getenv("POSTGRES_USER")
+	DB_PASS := os.Getenv("POSTGRES_PASSWORD")
 	DB_HOST := os.Getenv("DB_HOST")
 	DB_PORT := os.Getenv("DB_PORT")
-	DB_NAME := os.Getenv("DB_NAME")
+	POSTGRES_DB := os.Getenv("POSTGRES_DB")
 
 	dbURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		DB_USER, DB_PASS, DB_HOST, DB_PORT, DB_NAME)
+		POSTGRES_USER, DB_PASS, DB_HOST, DB_PORT, POSTGRES_DB)
 
 	// Open the connection
 	db, err = sqlx.Open("postgres", dbURL)

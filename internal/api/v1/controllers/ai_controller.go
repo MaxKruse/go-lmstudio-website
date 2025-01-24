@@ -11,10 +11,11 @@ import (
 // @Description		Endpoint to ask AI for help
 // @Accept			json
 // @Produce			json
+// @Tags			AI
+// @Param	completionRequest	body	requestdtos.CompletionRequest	true "Completion request, including at least a prompt, and at most an additional CompletionResult from previous calls"
 // @Success			200	{object}	dtos.CompletionResult
 // @Failure			400	{object}	error
 // @Failure			500	{object}	error
-// @Param			CompletionRequest	body	string	true "The Chat Completion Request including ChatCompletionNewParams and a Prompt"
 // @Router			/ai/completion	[post]
 func AiChatCompletion(e echo.Context) error {
 

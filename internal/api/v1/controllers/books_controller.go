@@ -70,11 +70,12 @@ func CreateBook(c echo.Context) error {
 		return err
 	}
 
-	if err := service.CreateBook(book); err != nil {
+	newBook, err := service.CreateBook(book)
+	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusCreated, book)
+	return c.JSON(http.StatusCreated, newBook)
 }
 
 func UpdateBook(c echo.Context) error {

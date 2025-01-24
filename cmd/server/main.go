@@ -62,6 +62,10 @@ func main() {
 		e.Use(middleware.CORS())
 		e.GET("/swagger/*", echoSwagger.WrapHandler)
 
+		if err := migrations.MigrateDown(); err != nil {
+			log.Fatal(err)
+		}
+
 		// also migrate up
 		if err := migrations.MigrateUp(); err != nil {
 			log.Fatal(err)

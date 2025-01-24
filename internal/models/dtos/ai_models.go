@@ -8,5 +8,5 @@ type CompletionResult struct {
 	LastCompletion *openai.ChatCompletion         `json:"last_completion" swaggerignore:"true"`
 
 	ParamsUsedJSON     interface{} `json:"params_used" example=Please visit the openai docs for 'ChatCompletionNewParams'"`
-	LastCompletionJSON interface{} `json:"params_used" example=Please visit the openai docs for 'ChatCompletion'"`
+	LastCompletionJSON interface{} `json:"last_completion" example=Please visit the openai docs for 'ChatCompletion'"`
 }

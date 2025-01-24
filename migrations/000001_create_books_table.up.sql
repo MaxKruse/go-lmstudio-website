@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS books (
     price DECIMAL(4,2),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP
+    deleted_at TIMESTAMP NULL
 );
 
 ALTER TABLE books
