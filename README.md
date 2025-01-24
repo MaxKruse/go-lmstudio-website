@@ -15,7 +15,7 @@ This project requires the following:
 
 ## Tips
 
-To re-generate the openapi spec, run `swag init --dir ./cmd/server/,./internal/api/v1/,./internal/models/dtos/` in the root directory. 
+To re-generate the openapi spec, run `swag init --dir ./cmd/server/,./internal/api/v1/controllers,./internal/models/dtos/,./internal/models/dtos/request_dtos/` in the root directory. 
 
 **This is important as the files provided in this repo are not being updated and only contain contact information.**
 
