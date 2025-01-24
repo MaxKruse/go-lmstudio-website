@@ -28,3 +28,12 @@ Then run:
 > migrate create -ext sql -dir ./migrations/ -seq <name>
 
 This will create a new migration file in the `./migrations/` directory.
+
+## Suggestions
+
+For LLMs to use, in my personal testing with an RTX 4070 12GB, I conclude the following models to work well: 
+
+- granite-3.1-8b-instruct
+- internlm2_5-20b-chat
+
+Other models might work, but flaky tool_chain usage has been observed.

@@ -14,6 +14,7 @@ import (
 	_ "github.com/maxkruse/go-lmstudio-website/docs"
 	v1 "github.com/maxkruse/go-lmstudio-website/internal/api/v1"
 	"github.com/maxkruse/go-lmstudio-website/internal/db/migrations"
+	"github.com/maxkruse/go-lmstudio-website/internal/llm_integration"
 )
 
 func init() {
@@ -69,8 +70,18 @@ func main() {
 		}
 	}
 
+	aiclient := llm_integration.NewClient()
+
 	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
+
+		prompt := "Can you tell me how hot it is in new york? please tell me in celcius?"
+
+		completion, err := aiclient.GetCompletion(c.Request().Context(), prompt)
+		if err != nil {
+			return err
+		}
+
+		return c.String(http.StatusOK, completion)
 	})
 
 	v1.RegisterRoutes(e)
