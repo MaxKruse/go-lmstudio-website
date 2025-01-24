@@ -3,6 +3,8 @@ package llm_integration
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"log"
 	"os"
 
@@ -45,7 +47,7 @@ func NewClient() AIClient {
 }
 
 func (ai *AIClient) addAllTools() {
-	ai.availableTools = append(ai.availableTools, aitools.GetWeatherTool()...)
+	ai.availableTools = append(ai.availableTools, aitools.GetBookTools()...)
 }
 
 func (ai *AIClient) GetCompletion(ctx context.Context, prompt string, paramsUsed *openai.ChatCompletionNewParams) (*dtos.CompletionResult, error) {
@@ -59,13 +61,14 @@ func (ai *AIClient) GetCompletion(ctx context.Context, prompt string, paramsUsed
 	} else {
 		params = openai.ChatCompletionNewParams{
 			Messages: openai.F([]openai.ChatCompletionMessageParamUnion{
-				openai.SystemMessage("You are a highly capable and collaborative AI assistant with access to tools. Your purpose is to provide accurate, detailed, and context-aware responses to user queries. When you encounter a task that can benefit from tool usage (e.g., executing code, retrieving information, generating images, or processing data), you must use the appropriate tool. After using a tool, clearly explain the results or actions to the user. If the task requires multiple steps, plan your approach and communicate progress effectively. Always consider the context of the user's request and prioritize relevance, clarity, and precision in your responses. When unsure about a specific need, ask clarifying questions before proceeding. Avoid using tools unnecessarily and ensure any generated output is actionable and aligns with the user's goals."),
+				openai.SystemMessage("You are a highly capable and collaborative AI assistant for a bookshop website with access to tools. Your purpose is to provide accurate, detailed, and context-aware responses to user queries. When you encounter a task that can benefit from tool usage (e.g., executing code, retrieving information, generating images, or processing data), you must use the appropriate tool. After using a tool, clearly explain the results or actions to the user. If the task requires multiple steps, plan your approach and communicate progress effectively. Always consider the context of the user's request and prioritize relevance, clarity, and precision in your responses. When unsure about a specific need, ask clarifying questions before proceeding. Avoid using tools unnecessarily and ensure any generated output is actionable and aligns with the user's goals. You adjust to the given information on where a user is from, for example in terms of date, time formats, measurement units, fahrenheit vs celius etc. Assume the user is from the USA and is using the measurements of that culture, unless otherwise specified."),
 				openai.UserMessage(prompt),
 			}),
-			Tools:      openai.F(ai.availableTools),
-			Seed:       openai.Int(0),
-			Model:      openai.String(ai.model),
-			ToolChoice: openai.F(openai.ChatCompletionToolChoiceOptionUnionParam(openai.ChatCompletionToolChoiceOptionAutoAuto)),
+			Tools:       openai.F(ai.availableTools),
+			Seed:        openai.Int(0),
+			Model:       openai.String(ai.model),
+			ToolChoice:  openai.F(openai.ChatCompletionToolChoiceOptionUnionParam(openai.ChatCompletionToolChoiceOptionAutoAuto)),
+			Temperature: openai.Float(0.3),
 		}
 	}
 
@@ -78,7 +81,7 @@ func (ai *AIClient) GetCompletion(ctx context.Context, prompt string, paramsUsed
 	toolCalls := completion.Choices[0].Message.ToolCalls
 
 	completionResult.ParamsUsed = params
-	completionResult.LastCompletion = completion
+	completionResult.LastCompletion = completion.Choices[0].Message
 
 	if len(toolCalls) == 0 {
 		log.Println("No tool calls found")
@@ -86,28 +89,27 @@ func (ai *AIClient) GetCompletion(ctx context.Context, prompt string, paramsUsed
 	}
 
 	params.Messages.Value = append(params.Messages.Value, completion.Choices[0].Message)
+	// tell the model how to handle tools, since we need to use at least one now
+	params.Messages.Value = append(params.Messages.Value, openai.SystemMessage(
+		"You only respond to the question, you do not ask any followup questions or do smalltalk. If you cannot find the answer, respond in a way that asks the user to provide more information and tell them what error we encountered, in a way a non-technical person can understand. Behave like a salesperson, so if they ask for something that we dont have, give them a hint for other things we might have."))
 
 	for _, toolCall := range toolCalls {
-		if toolCall.Function.Name == "get_weather" {
-			// get args if possible
-			var args map[string]interface{}
-			err := json.Unmarshal([]byte(toolCall.Function.Arguments), &args)
-
-			if err != nil {
-				log.Println("Error unmarshalling arguments:", err)
-				continue
-			}
-
-			format, ok := args["format"].(string)
-			if !ok {
-				format = aitools.TEMP_FORMAT_CELSIUS
-			}
-
-			weatherResponse := aitools.GetWeatherFunc(format)
-
-			params.Messages.Value = append(params.Messages.Value, openai.SystemMessage("You only respond to the question, you do not ask any followup questions or do smalltalk. If you cannot find the answer, respond in a way that asks the user to provide more information."))
-			params.Messages.Value = append(params.Messages.Value, openai.ToolMessage(toolCall.ID, weatherResponse))
+		var data interface{}
+		var err error
+		if toolCall.Function.Name == "get_books_by_price" {
+			data, err = handleGetBooksByPrice(toolCall, &params)
 		}
+
+		// if the error is not nil, we tell the LLM that it failed
+		if err != nil {
+			params.Messages.Value = append(params.Messages.Value, openai.SystemMessage(fmt.Sprintf("Error: %s", err.Error())))
+			params.Messages.Value = append(params.Messages.Value, openai.ToolMessage(toolCall.ID, "Error: "+err.Error()))
+			continue
+		}
+
+		byteResult, _ := json.Marshal(data)
+
+		params.Messages.Value = append(params.Messages.Value, openai.ToolMessage(toolCall.ID, string(byteResult)))
 	}
 
 	completion, err = ai.client.Chat.Completions.New(ctx, params)
@@ -115,7 +117,25 @@ func (ai *AIClient) GetCompletion(ctx context.Context, prompt string, paramsUsed
 		return nil, err
 	}
 
-	completionResult.LastCompletion = completion
+	completionResult.ParamsUsed = params
+	completionResult.LastCompletion = completion.Choices[0].Message
 
 	return &completionResult, nil
+}
+
+func handleGetBooksByPrice(toolCall openai.ChatCompletionMessageToolCall, params *openai.ChatCompletionNewParams) (interface{}, error) {
+	// Get args if possible
+	var args map[string]interface{}
+	err := json.Unmarshal([]byte(toolCall.Function.Arguments), &args)
+	if err != nil {
+		log.Println("Error unmarshalling arguments:", err)
+		return "", err
+	}
+
+	price, ok := args["price"].(float64)
+	if !ok {
+		return "", errors.New("price is present or float64")
+	}
+
+	return aitools.GetBooksByPriceFunc(price)
 }

@@ -54,24 +54,28 @@ func ExecuteTx(ctx context.Context, f func(*sqlx.Tx) error) error {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
 
+	var fErr error // Variable to store the error from f()
+
 	defer func() {
 		if r := recover(); r != nil {
 			log.Printf("Transaction panicked: %v", r)
-			if tx.Rollback() != nil {
-				log.Printf("Failed to rollback transaction after panic")
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				log.Printf("Failed to rollback transaction after panic: %v", rollbackErr)
 			}
-		} else if err = f(tx); err != nil {
-			log.Printf("Transaction error: %v, rolling back...", err)
-			if tx.Rollback() != nil {
-				log.Printf("Failed to rollback transaction")
+		} else if fErr != nil {
+			log.Printf("Transaction error: %v, rolling back...", fErr)
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				log.Printf("Failed to rollback transaction: %v", rollbackErr)
 			}
 		} else {
 			log.Println("Committing successful transaction...")
-			if err := tx.Commit(); err != nil {
-				log.Printf("Failed to commit transaction: %v", err)
+			if commitErr := tx.Commit(); commitErr != nil {
+				log.Printf("Failed to commit transaction: %v", commitErr)
+				fErr = commitErr // Return the commit error if it happens
 			}
 		}
 	}()
 
-	return nil // The function is designed to not return until the defer block executes
+	fErr = f(tx) // Execute the provided function and store its error
+	return fErr  // Return the error from f() or nil if successful
 }

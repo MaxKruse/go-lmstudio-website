@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/maxkruse/go-lmstudio-website/internal/models/dtos"
 	requestdtos "github.com/maxkruse/go-lmstudio-website/internal/models/dtos/request_dtos"
-	"github.com/maxkruse/go-lmstudio-website/internal/service"
+	"github.com/maxkruse/go-lmstudio-website/internal/service/book_service"
 	"github.com/maxkruse/go-lmstudio-website/internal/utils/converters"
 )
 
@@ -19,7 +19,7 @@ import (
 // @Failure	500	{object} dtos.ErrorResponse
 // @Router /books [get]
 func GetBooks(c echo.Context) error {
-	books, err := service.GetBooks()
+	books, err := book_service.Get()
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, dtos.ErrorResponse{Error: err.Error()})
@@ -46,13 +46,13 @@ func GetBookById(c echo.Context) error {
 		return err
 	}
 
-	book, err := service.GetBookById(int32(idInt))
+	book, err := book_service.GetById(int32(idInt))
 
 	if err != nil {
 		return c.JSON(http.StatusNotFound, dtos.ErrorResponse{Error: err.Error()})
 	}
 
-	return c.JSON(http.StatusOK, book)
+	return c.JSON(http.StatusOK, converters.BookEntityToDto(book))
 }
 
 // @Summary Create a book
@@ -70,12 +70,12 @@ func CreateBook(c echo.Context) error {
 		return err
 	}
 
-	newBook, err := service.CreateBook(book)
+	newBook, err := book_service.Create(book)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusNotModified, dtos.ErrorResponse{Error: err.Error()})
 	}
 
-	return c.JSON(http.StatusCreated, newBook)
+	return c.JSON(http.StatusCreated, converters.BookEntityToDto(newBook))
 }
 
 func UpdateBook(c echo.Context) error {
@@ -85,7 +85,7 @@ func UpdateBook(c echo.Context) error {
 	}
 	id := c.Param("id")
 
-	if err := service.UpdateBook(converters.BookDtoToEntity(book)); err != nil {
+	if err := book_service.Update(converters.BookDtoToEntity(book)); err != nil {
 		return err
 	}
 
@@ -94,7 +94,7 @@ func UpdateBook(c echo.Context) error {
 		return err
 	}
 
-	bookEntity, err := service.GetBookById(idInt)
+	bookEntity, err := book_service.GetById(idInt)
 
 	if err != nil {
 		return c.JSON(http.StatusNotFound, dtos.ErrorResponse{Error: err.Error()})
@@ -110,7 +110,7 @@ func DeleteBook(c echo.Context) error {
 		return err
 	}
 
-	if err := service.DeleteBook(idInt); err != nil {
+	if err := book_service.Delete(idInt); err != nil {
 		return err
 	}
 

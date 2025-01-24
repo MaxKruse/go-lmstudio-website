@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/maxkruse/go-lmstudio-website/internal/llm_integration"
+	"github.com/maxkruse/go-lmstudio-website/internal/models/dtos"
 	requestdtos "github.com/maxkruse/go-lmstudio-website/internal/models/dtos/request_dtos"
 )
 
@@ -30,11 +31,11 @@ func AiChatCompletion(e echo.Context) error {
 	aiClient := llm_integration.NewClient()
 
 	// step 3: get the completion
-	completionResult, err := aiClient.GetCompletion(e.Request().Context(), request.Prompt, &request.ParamsUsed)
+	completionResult, err := aiClient.GetCompletion(e.Request().Context(), request.Prompt, request.ParamsUsed)
 
 	if err != nil {
-		return e.JSON(http.StatusInternalServerError, err)
+		return e.JSON(http.StatusInternalServerError, dtos.ErrorResponse{Error: err.Error()})
 	}
 
-	return e.JSON(http.StatusOK, completionResult)
+	return e.JSON(http.StatusOK, *completionResult)
 }
