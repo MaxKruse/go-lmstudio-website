@@ -37,3 +37,15 @@ For LLMs to use, in my personal testing with an RTX 4070 12GB, I conclude the fo
 - internlm2_5-20b-chat
 
 Other models might work, but flaky tool_chain usage has been observed.
+
+## Todo Goals
+
+- [ ] Add tests. Like, at all.
+- [ ] Add Redis caching based on user auth header to keep
+- [ ] Add more tools in general
+- [ ] Find a way to make the LLM want to use multiple tools at once and use the combined knowledge to solve the problem
+- [ ] Write a frontend to show the results in a non-abstract way
+
+## Example Output (with internlm2_5-20b-chat)
+
+![Alt text](./images/1.png)
