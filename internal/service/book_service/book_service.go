@@ -112,18 +112,30 @@ func Delete(id int32) error {
 
 // custom funcs
 
-func GetBooksBelowPrice(ctx context.Context, price float64) ([]entities.Book, error) {
-	var entities []entities.Book
+func GetBooksBetweenPrice(ctx context.Context, price_min float64, price_max float64) ([]entities.Book, error) {
+	var val []entities.Book
+
+	query := fmt.Sprintf("%s WHERE price>$1 AND price<$2 AND deleted_at IS NULL ORDER BY id DESC", query_SELECT_BOOK)
 
 	err := db.ExecuteTx(ctx, func(tx *sqlx.Tx) error {
-		err := tx.Select(&entities, fmt.Sprintf("%s WHERE price<$1 AND deleted_at IS NULL ORDER BY id DESC", query_SELECT_BOOK), price)
+		rows, err := tx.Queryx(query, price_min, price_max)
 
 		if err != nil {
 			return err
 		}
 
+		for rows.Next() {
+			book := entities.Book{}
+			err := rows.StructScan(&book)
+			if err != nil {
+				return err
+			}
+
+			val = append(val, book)
+		}
+
 		return nil
 	})
 
-	return entities, err
+	return val, err
 }

@@ -13,6 +13,7 @@ import (
 
 	_ "github.com/maxkruse/go-lmstudio-website/docs"
 	v1 "github.com/maxkruse/go-lmstudio-website/internal/api/v1"
+	"github.com/maxkruse/go-lmstudio-website/internal/db"
 	"github.com/maxkruse/go-lmstudio-website/internal/db/migrations"
 )
 
@@ -71,6 +72,8 @@ func main() {
 		if err := migrations.MigrateUp(); err != nil {
 			log.Fatal("Fatal error on migrate up:", err)
 		}
+
+		db.DebugData()
 	}
 
 	v1.RegisterRoutes(e)

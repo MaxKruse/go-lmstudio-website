@@ -5,10 +5,13 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/maxkruse/go-lmstudio-website/internal/models/entities"
+	"github.com/maxkruse/go-lmstudio-website/internal/utils"
 )
 
 var (
@@ -78,4 +81,41 @@ func ExecuteTx(ctx context.Context, f func(*sqlx.Tx) error) error {
 
 	fErr = f(tx) // Execute the provided function and store its error
 	return fErr  // Return the error from f() or nil if successful
+}
+
+func DebugData() {
+
+	// adds 10 books with random strings for testing
+
+	for i := 0; i < 10; i++ {
+
+		book := entities.Book{
+			Id:            rand.Int31(),
+			Title:         utils.RandomString("Title", 10),
+			Author:        utils.RandomString("Author", 8),
+			Description:   utils.RandomString("Description", 20),
+			ImageUrl:      fmt.Sprintf("https://example.com/image%d.jpg", rand.Intn(100)),
+			PublishedDate: utils.RandomDate(),
+			Isbn:          utils.RandomISBN(),
+			Price:         float32(rand.Float64()*20) + 1.0,
+			CreatedAt:     utils.RandomTimestamp(),
+			UpdatedAt:     utils.RandomTimestamp(),
+			DeletedAt:     utils.RandomTimestamp(),
+		}
+
+		err := ExecuteTx(context.Background(), func(tx *sqlx.Tx) error {
+			_, err := tx.NamedExec(`INSERT INTO books (title, author, description, image_url, published_date, isbn, price) VALUES (:title, :author, :description, :image_url, :published_date, :isbn, :price)`, book)
+
+			if err != nil {
+				return err
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			log.Println(err)
+		}
+
+	}
 }
