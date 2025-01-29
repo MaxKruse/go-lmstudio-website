@@ -33,10 +33,12 @@ This will create a new migration file in the `./migrations/` directory.
 
 For LLMs to use, in my personal testing with an RTX 4070 12GB, I conclude the following models to work well: 
 
+- qwen2.5-7b-instruct (the currently best performing one)
 - granite-3.1-8b-instruct
 - internlm2_5-20b-chat
 
-Other models might work, but flaky tool_chain usage has been observed.
+Other models might work, but flaky tool_chain usage has been observed, especially in Mistral models.
+The current hard-coded system prompt is designed to work with qwen2.5-7b-instruct.
 
 ## Todo Goals
 
