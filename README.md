@@ -43,9 +43,9 @@ The current hard-coded system prompt is designed to work with qwen2.5-7b-instruc
 ## Todo Goals
 
 - [ ] Add tests. Like, at all.
-- [ ] Add Redis caching based on user auth header to keep
+- [x] Add Redis caching based on user key
 - [ ] Add more tools in general
-- [ ] Find a way to make the LLM want to use multiple tools at once and use the combined knowledge to solve the problem
+- [x] Find a way to make the LLM want to use multiple tools at once and use the combined knowledge to solve the problem
 - [ ] Write a frontend to show the results in a non-abstract way
 
 ## Example Output (with internlm2_5-20b-chat)
