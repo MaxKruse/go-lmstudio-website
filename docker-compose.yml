@@ -12,6 +12,23 @@ services:
       - 5432:5432
     volumes:
       - bookstore_db_data:/var/lib/postgresql/data
+
+  valkey:
+    image: valkey/valkey:latest
+    container_name: valkey
+    restart: always
+    ports:
+      - 6379:6379
+
+    environment:
+      - SAVE="60 1"
+      - APPENDONLY=yes
+
+    volumes:
+      - valkey_data:/data
+
+    
     
 volumes:
   bookstore_db_data:
+  valkey_data:
