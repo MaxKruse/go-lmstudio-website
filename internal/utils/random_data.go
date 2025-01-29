@@ -12,7 +12,7 @@ func RandomString(prefix string, length int) string {
 	for i := range result {
 		result[i] = letters[rand.Intn(len(letters))]
 	}
-	return fmt.Sprintf("%s-%s", prefix, string(result))
+	return fmt.Sprintf("%s%s", prefix, string(result))
 }
 
 func RandomDate() string {

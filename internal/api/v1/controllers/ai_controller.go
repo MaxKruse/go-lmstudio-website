@@ -31,7 +31,7 @@ func AiChatCompletion(e echo.Context) error {
 	aiClient := llm_integration.NewClient()
 
 	// step 3: get the completion
-	completionResult, err := aiClient.GetCompletion(e.Request().Context(), request.Prompt, request.ParamsUsed)
+	completionResult, err := aiClient.GetCompletion(e.Request().Context(), request.Prompt, request.Key)
 
 	if err != nil {
 		return e.JSON(http.StatusInternalServerError, dtos.ErrorResponse{Error: err.Error()})

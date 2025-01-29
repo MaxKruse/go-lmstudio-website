@@ -20,8 +20,8 @@ const query_SELECT_BOOK = `SELECT id,
     isbn,
     price,
     created_at,
-    updated_at,
-    COALESCE(deleted_at::TEXT, 'Not Deleted') AS deleted_at FROM books`
+    updated_at
+	FROM books`
 
 func Get() ([]entities.Book, error) {
 	var books []entities.Book
