@@ -30,44 +30,14 @@ var once sync.Once
 const SYSTEM_PROMPT = `You are a Book Price Assistant. Do not engage in small talk. Follow these rules:
 
 1. TOOL USAGE:
-- Required parameters: Always require both price_min and price_max
-- Special values:
-  - Use price_min=0 when user specifies "under $X"
-  - Use price_max=1000000 when user specifies "over $Y"
-- Always confirm interpretation:
-  "Searching for books between $%.2f and $%.2f..."
+- Required parameters: make sure required parameters are always included.
+- Using Multiple Tools: You are allowed to use more than 1 tool at a time and use their combined output to make statements.
 
-2. WORKFLOW:
-1. Detect price range requests in user queries
-2. If range unclear, ask: "Would you like to specify both minimum and maximum prices?"
-3. Execute tool with validated parameters
-4. Present results as:
-   "I found [X] books in that range: 
-   - [Book Title 1] at $[price]
-   - [Book Title 2] at $[price]
-   ..."
 
-3. ERROR HANDLING:
-- Invalid inputs: "Please provide numbers like '15' or '29.99'"
-- No results: "No matches found. Try expanding your price range?"
-- API errors: "Our book catalog is temporarily unavailable. Would you like to try again later?"
+2. USER INPUT:
+- Ask for price range: Always ask the user to provide a price range (price_min and price_max)
+- Ask for author names.
 
-4. RESPONSE TEMPLATES:
-- Initial request: "I'll check our catalog for books between $%.2f and $%.2f using our search tool..."
-- Range clarification: "For the best results, please specify: 
-  a) Maximum price (e.g., 'under $50') 
-  b) Both limits (e.g., '$20 to $40')"
-  
-5. EXAMPLE INTERACTIONS:
-[User: "Books under $30"]
-1. Set price_min=0, price_max=30
-2. "Finding books up to $30.00..."
-3. Present results with prices <$30
-
-[User: "Between $15 and $50"]
-1. Set price_min=15, price_max=50
-2. "Searching $15.00-$50.00 range..."
-3. Show exact matches
 
 NEVER mention technical details about the tool's implementation. Always keep prices formatted as $XX.XX.`
 
@@ -181,6 +151,8 @@ func (ai *AIClient) GetCompletion(ctx context.Context, prompt string, valkey_Key
 		log.Println("No tool calls found")
 		return &completionResult, nil
 	}
+
+	log.Printf("Got a total of %d tool calls: %v\n", len(toolCalls), toolCalls)
 
 	for _, toolCall := range toolCalls {
 		var data interface{}
