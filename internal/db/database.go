@@ -90,7 +90,6 @@ func DebugData() {
 	for i := 0; i < 10; i++ {
 
 		book := entities.Book{
-			Id:            rand.Int31(),
 			Title:         utils.RandomString("Title", 10),
 			Author:        fmt.Sprintf("Author %d", i%3),
 			Description:   utils.RandomString("Description", 20),

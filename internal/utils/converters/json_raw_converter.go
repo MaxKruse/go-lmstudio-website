@@ -3,6 +3,7 @@ package converters
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 
 	"github.com/openai/openai-go"
 )
@@ -135,7 +136,7 @@ func (r *RawChatData) ConvertToChatCompletionNewParams(availableTools []openai.C
 		case []ContentItem:
 			return false
 		default:
-			panic("unknown content type")
+			panic("unknown content type: " + reflect.TypeOf(content).String() + " for content: " + fmt.Sprintf("%v", content))
 		}
 	}
 
@@ -146,11 +147,15 @@ func (r *RawChatData) ConvertToChatCompletionNewParams(availableTools []openai.C
 		case string:
 			return false
 		default:
-			panic("unknown content type")
+			panic("unknown content type:" + fmt.Sprintf("%v", content))
 		}
 	}
 
 	for _, message := range r.Messages {
+
+		if message.Content == nil {
+			continue
+		}
 
 		// check if its a tool call, system, assistant or user message
 		switch message.Role {

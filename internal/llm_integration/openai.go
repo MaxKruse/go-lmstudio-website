@@ -152,8 +152,6 @@ func (ai *AIClient) GetCompletion(ctx context.Context, prompt string, valkey_Key
 		return &completionResult, nil
 	}
 
-	log.Printf("Got a total of %d tool calls: %v\n", len(toolCalls), toolCalls)
-
 	for _, toolCall := range toolCalls {
 		var data interface{}
 		var err error
@@ -162,6 +160,8 @@ func (ai *AIClient) GetCompletion(ctx context.Context, prompt string, valkey_Key
 			data, err = handleGetBooksByPrice(toolCall)
 		case "get_books_by_author":
 			data, err = handleGetBooksByAuthor(toolCall)
+		case "create_book":
+			data, err = handleCreateBook(toolCall)
 		default:
 			err = fmt.Errorf("unknown tool: %s", toolCall.Function.Name)
 		}

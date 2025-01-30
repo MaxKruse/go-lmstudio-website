@@ -59,9 +59,21 @@ func Create(book requestdtos.CreateBookRequest) (entities.Book, error) {
 	var newBook entities.Book
 
 	err := db.ExecuteTx(context.Background(), func(tx *sqlx.Tx) error {
-		row := tx.QueryRow(`INSERT INTO books (title, author, description, image_url, published_date, isbn, price) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING ID`, book.Title, book.Author, book.Description, book.ImageUrl, book.PublishedDate, book.Isbn, book.Price)
+		rows, err := tx.NamedQuery("INSERT INTO books (title, author, description, image_url, published_date, isbn, price) VALUES (:title, :author, :description, :image_url, :published_date, :isbn, :price) RETURNING ID", book)
 
-		return row.Scan(&newBook.Id)
+		if err != nil {
+			return err
+		}
+
+		for rows.Next() {
+			err = rows.Scan(&newBook.Id)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+
 	})
 
 	// get the new book data from that id
