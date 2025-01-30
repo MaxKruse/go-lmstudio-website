@@ -20,13 +20,29 @@ func handleGetBooksByPrice(toolCall openai.ChatCompletionMessageToolCall) (inter
 
 	priceMin, ok := args["price_min"].(float64)
 	if !ok {
-		return "", errors.New("price_min is present or float64")
+		return "", errors.New("price_min is missing or not a float64")
 	}
 
 	priceMax, ok := args["price_max"].(float64)
 	if !ok {
-		return "", errors.New("price_max is present or float64")
+		return "", errors.New("price_max is missing or not a float64")
 	}
 
 	return aitools.GetBooksByPriceFunc(priceMin, priceMax)
+}
+
+func handleGetBooksByAuthor(toolCall openai.ChatCompletionMessageToolCall) (interface{}, error) {
+	var args map[string]interface{}
+	err := json.Unmarshal([]byte(toolCall.Function.Arguments), &args)
+	if err != nil {
+		log.Println("Error unmarshalling arguments:", err)
+		return "", err
+	}
+
+	author, ok := args["author"].(string)
+	if !ok {
+		return "", errors.New("author is missing or not a string")
+	}
+
+	return aitools.GetBooksByAuthorFunc(author)
 }

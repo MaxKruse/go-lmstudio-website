@@ -188,6 +188,8 @@ func (ai *AIClient) GetCompletion(ctx context.Context, prompt string, valkey_Key
 		switch toolCall.Function.Name {
 		case "get_books_by_price":
 			data, err = handleGetBooksByPrice(toolCall)
+		case "get_books_by_author":
+			data, err = handleGetBooksByAuthor(toolCall)
 		default:
 			err = fmt.Errorf("unknown tool: %s", toolCall.Function.Name)
 		}

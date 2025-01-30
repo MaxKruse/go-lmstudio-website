@@ -139,3 +139,28 @@ func GetBooksBetweenPrice(ctx context.Context, price_min float64, price_max floa
 
 	return val, err
 }
+
+func GetBooksByAuthor(ctx context.Context, author string) ([]entities.Book, error) {
+	var val []entities.Book
+
+	query := fmt.Sprintf("%s WHERE author=$1 AND deleted_at IS NULL ORDER BY id DESC", query_SELECT_BOOK)
+	err := db.ExecuteTx(ctx, func(tx *sqlx.Tx) error {
+		rows, err := tx.Queryx(query, author)
+		if err != nil {
+			return err
+		}
+
+		for rows.Next() {
+			book := entities.Book{}
+			err := rows.StructScan(&book)
+			if err != nil {
+				return err
+			}
+			val = append(val, book)
+		}
+		return nil
+	})
+
+	return val, err
+
+}

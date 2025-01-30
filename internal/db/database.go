@@ -92,7 +92,7 @@ func DebugData() {
 		book := entities.Book{
 			Id:            rand.Int31(),
 			Title:         utils.RandomString("Title", 10),
-			Author:        utils.RandomString("Author", 8),
+			Author:        fmt.Sprintf("Author %d", i%3),
 			Description:   utils.RandomString("Description", 20),
 			ImageUrl:      fmt.Sprintf("https://example.com/image%d.jpg", rand.Intn(100)),
 			PublishedDate: utils.RandomDate(),
