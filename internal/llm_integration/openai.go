@@ -83,6 +83,7 @@ func NewClient() AIClient {
 
 func (ai *AIClient) addAllTools() {
 	ai.availableTools = append(ai.availableTools, aitools.GetBookTools()...)
+	ai.availableTools = append(ai.availableTools, aitools.GetUtilTools()...)
 }
 
 func (ai *AIClient) GetCompletion(ctx context.Context, prompt string, valkey_Key string) (*dtos.CompletionResult, error) {
